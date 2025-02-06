@@ -1,11 +1,19 @@
-# start with a base image containing Java runtime
+# Stage 1: Build the application inside a Maven container
+FROM maven:3.9.6-eclipse-temurin-17 AS build
+
+WORKDIR /app
+
+COPY . .
+
+RUN mvn clean package -DskipTests
+
+# Stage 2: Create a runtime image
 FROM openjdk:17-jdk-slim
 
-#Information around who maintains the image
-MAINTAINER PeizhenLiao
+WORKDIR /app
 
-#Add the application's jar to the image
-COPY target/receipt-0.0.1-SNAPSHOT.jar receipt-0.0.1-SNAPSHOT.jar
+COPY --from=build /app/target/*.jar receipt.jar
 
-#execute the application
-ENTRYPOINT ["java","-jar","/receipt-0.0.1-SNAPSHOT.jar"]
+EXPOSE 8080
+
+ENTRYPOINT ["java","-jar","receipt.jar"]

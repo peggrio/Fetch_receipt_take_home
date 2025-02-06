@@ -2,7 +2,15 @@
 
 ## Overview
 
-This project is a web service that processes receipts and calculates reward points based on predefined rules. The API follows the provided `api.yml` specification.
+This project is a web service that processes receipts and calculates reward points based on predefined rules. The 
+API follows the provided `api.yml` specification. The default port is 8080.
+
+## Tech Stack
+
+- Java 17
+- Spring Boot
+- Spring Data JPA
+- Swagger UI
 
 ## Features
 
