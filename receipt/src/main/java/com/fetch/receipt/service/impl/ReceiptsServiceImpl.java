@@ -4,6 +4,7 @@ import com.fetch.receipt.dto.ItemDto;
 import com.fetch.receipt.dto.ReceiptDto;
 import com.fetch.receipt.entity.Receipt;
 import com.fetch.receipt.exception.ReceiptAlreadyExistsException;
+import com.fetch.receipt.exception.ResourceNotFoundException;
 import com.fetch.receipt.mapper.ReceiptsMapper;
 import com.fetch.receipt.repository.ReceiptRepository;
 import com.fetch.receipt.service.IReceiptsService;
@@ -11,6 +12,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,13 +48,32 @@ public class ReceiptsServiceImpl implements IReceiptsService {
         return savedReceipt.getReceiptId();
     }
 
+    /**
+     * @param id
+     * @return points
+     */
+    @Override
+    public double getPoints(String id) {
+        Receipt receipt = receiptRepository.findByReceiptId(id).orElseThrow(
+                () -> new ResourceNotFoundException("Receipt", "id", id)
+        );
+        return receipt.getPoints();
+    }
+
+    /**
+     *
+     * @param receiptDto
+     * @return points after calculation
+     */
     public double calculatePoints(ReceiptDto receiptDto){
 
         String retailer = receiptDto.getRetailer();
         double total = receiptDto.getTotal();
+        LocalDate purchase_date = receiptDto.getPurchaseDate();
+        LocalTime purchase_time = receiptDto.getPurchaseTime();
         List<ItemDto> items_list= receiptDto.getItems();
-        double points = 0;
 
+        double points = 0;
 
         // Rule 1: One point for every alphanumeric character in the retailer name
         points += retailer.replaceAll("[^A-Za-z0-9]", "").length();
@@ -67,17 +89,29 @@ public class ReceiptsServiceImpl implements IReceiptsService {
         if (total_round.remainder(quarterValue).compareTo(BigDecimal.ZERO) == 0) {
             points += 25;
         }
+
+        // Rule 4: 5 points for every two items
+        points += (items_list.size() / 2) * 5;
+
+        // Rule 5: Points for items with description length multiple of 3
         for(int i = 0;i < items_list.size(); i++){
-            System.out.println("description: " + items_list.get(i).getShortDescription());
-            System.out.println("price: "+ items_list.get(i).getPrice());
+            String trimmedDesc = items_list.get(i).getShortDescription().trim();
+            if (trimmedDesc.length() % 3 == 0) {
+                points += Math.ceil(new BigDecimal(items_list.get(i).getPrice()).multiply(new BigDecimal("0.2")).doubleValue());
+            }
         }
 
+        // Rule 7: 6 points if the day in the purchase date is odd
+        if (purchase_date.getDayOfMonth() % 2 != 0) {
+            points += 6;
+        }
 
-//        // Rule 4: 5 points for every two items
-//        points += (receipt.getItems().size() / 2) * 5;
+        // Rule 8: 10 points if the time of purchase is after 2:00pm and before 4:00pm
+        if (purchase_time.isAfter(LocalTime.of(14, 0)) &&
+                purchase_time.isBefore(LocalTime.of(16, 0))) {
+            points += 10;
+        }
 
         return points;
     }
-
-
 }
