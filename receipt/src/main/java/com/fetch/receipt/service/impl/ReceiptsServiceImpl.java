@@ -55,7 +55,7 @@ public class ReceiptsServiceImpl implements IReceiptsService {
     @Override
     public double getPoints(String id) {
         Receipt receipt = receiptRepository.findByReceiptId(id).orElseThrow(
-                () -> new ResourceNotFoundException("Receipt", "id", id)
+                () -> new ResourceNotFoundException(id)
         );
         return receipt.getPoints();
     }
@@ -68,9 +68,9 @@ public class ReceiptsServiceImpl implements IReceiptsService {
     public double calculatePoints(ReceiptDto receiptDto){
 
         String retailer = receiptDto.getRetailer();
-        double total = receiptDto.getTotal();
-        LocalDate purchase_date = receiptDto.getPurchaseDate();
-        LocalTime purchase_time = receiptDto.getPurchaseTime();
+        String total = receiptDto.getTotal();
+        LocalDate purchase_date = LocalDate.parse(receiptDto.getPurchaseDate());
+        LocalTime purchase_time = LocalTime.parse(receiptDto.getPurchaseTime());
         List<ItemDto> items_list= receiptDto.getItems();
 
         double points = 0;

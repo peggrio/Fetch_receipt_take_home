@@ -31,7 +31,7 @@ This project is a web service that processes receipts and calculates reward poin
 
 ## API Documentation
 
-After running the container, visit [Swagger UI](`http://localhost:8080/swagger-ui/index.html`)
+After running the container, visit [Swagger UI](http://localhost:8080/swagger-ui/index.html)
 for detailed api design
 ![img.png](doc_sample.png)
 

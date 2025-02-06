@@ -20,16 +20,16 @@ public class Receipt {
     private String retailer;
 
     @Column(name = "purchase_date")
-    private LocalDate purchaseDate;
+    private String purchaseDate;
 
     @Column(name = "purchase_time")
-    private LocalTime purchaseTime;
+    private String purchaseTime;
 
-    private Double total;
+    private String total;
 
     @Lob //large object
     @Convert(converter = ItemsConverter.class)
     private List<ItemDto> items;
 
-    private Double points;
+    private double points;
 }
